@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// Spawns asteroid prefabs continuously ahead of the player in a designated side-scrolling spawn window.
+/// Spawns asteroid prefabs continuously ahead of the player in a designated side-scrolling spawn window with dynamic scaling.
 /// </summary>
 public class AsteroidSpawner : MonoBehaviour
 {
@@ -11,19 +11,22 @@ public class AsteroidSpawner : MonoBehaviour
     [SerializeField] private Transform playerTransform;
 
     [Header("Spawn Timing")]
-    [SerializeField] private float spawnInterval = 1.5f;   // Time between spawns
+    [SerializeField] private float baseSpawnInterval = 1.5f;
+    [SerializeField] private float minSpawnInterval = 0.5f;   // Fastest limit
     [SerializeField] private float initialDelay = 1.0f;
 
     [Header("Designated Spawn Bounds")]
-    [SerializeField] private float spawnXDistance = 25f;   // Distance ahead of camera/player
+    [SerializeField] private float spawnXDistance = 25f;    // Distance ahead of camera/player
     [SerializeField] private Vector2 spawnYRange = new Vector2(-6f, 6f); // Top and bottom bounds
     [SerializeField] private Vector2 scaleRange = new Vector2(0.8f, 2.2f); // Size variety
 
     private Camera mainCamera;
+    private DifficultyManager difficultyManager;
 
     private void Start()
     {
         mainCamera = Camera.main;
+        difficultyManager = Object.FindFirstObjectByType<DifficultyManager>();
 
         if (playerTransform == null)
         {
@@ -34,9 +37,7 @@ public class AsteroidSpawner : MonoBehaviour
         StartCoroutine(SpawnRoutine());
     }
 
-    /// <summary>
-    /// Coroutine loop that continuously instantiates asteroids while the game is active.
-    /// </summary>
+    // Coroutine loop that continuously instantiates asteroids while scaling speed with difficulty.
     private IEnumerator SpawnRoutine()
     {
         yield return new WaitForSeconds(initialDelay);
@@ -48,24 +49,27 @@ public class AsteroidSpawner : MonoBehaviour
                 SpawnObstacle();
             }
 
-            yield return new WaitForSeconds(spawnInterval);
+            // Calculate current interval adjusted by difficulty manager
+            float currentMultiplier = (difficultyManager != null) ? difficultyManager.CurrentDifficultyMultiplier : 1f;
+            float dynamicInterval = Mathf.Max(minSpawnInterval, baseSpawnInterval / currentMultiplier);
+
+            yield return new WaitForSeconds(dynamicInterval);
         }
     }
 
-    /// <summary>
-    /// Custom method to instantiate an asteroid within designated random boundaries.
-    /// </summary>
+    // Custom method to instantiate an asteroid within designated random boundaries.
     public void SpawnObstacle()
     {
         if (asteroidPrefabs == null || asteroidPrefabs.Length == 0) return;
 
         // Select random prefab from array
-        GameObject selectedPrefab = asteroidPrefabs[Random.Range(0, asteroidPrefabs.Length)];
+        int randomIndex = Random.Range(0, asteroidPrefabs.Length);
+        GameObject selectedPrefab = asteroidPrefabs[randomIndex];
 
         // Calculate spawn position ahead of the camera view
         float spawnX = mainCamera != null ? mainCamera.transform.position.x + spawnXDistance : transform.position.x + spawnXDistance;
         float spawnY = Random.Range(spawnYRange.x, spawnYRange.y);
-        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f); // Grounded on Z = 0 gameplay plane
+        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
 
         // Instantiate and apply random scale
         GameObject newAsteroid = Instantiate(selectedPrefab, spawnPos, Random.rotation);

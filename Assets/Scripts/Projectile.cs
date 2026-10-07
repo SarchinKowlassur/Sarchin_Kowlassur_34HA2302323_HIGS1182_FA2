@@ -25,16 +25,14 @@ public class Projectile : MonoBehaviour
 
     private void Update()
     {
-        // 1. Move straight forward along X axis
+        // Move straight forward along X axis
         transform.Translate(Vector3.right * speed * Time.deltaTime, Space.World);
 
-        // 2. Check if projectile has traveled off-screen
+        // Check if projectile has traveled off-screen
         CheckViewportBounds();
     }
 
-    /// <summary>
-    /// Destroys the projectile as soon as it leaves the camera's visible viewport.
-    /// </summary>
+    // Destroys the projectile as soon as it leaves the camera's visible viewport.
     private void CheckViewportBounds()
     {
         if (mainCamera == null) return;
@@ -52,11 +50,11 @@ public class Projectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Asteroid"))
+        if (other.CompareTag("Asteroid") || other.CompareTag("Enemy"))
         {
-            Debug.Log("Projectile impacted Asteroid: " + other.name);
-            Destroy(other.gameObject); // Destroy asteroid on hit
-            Destroy(gameObject);       // Destroy laser on impact
+            Debug.Log("Projectile impacted target: " + other.name);
+            Destroy(other.gameObject); // Destroy target
+            Destroy(gameObject);       // Destroy laser
         }
     }
 }

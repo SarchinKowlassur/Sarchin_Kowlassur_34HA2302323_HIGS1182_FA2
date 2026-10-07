@@ -40,23 +40,19 @@ public class CollectibleManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Spawns a single scrap item ahead of the camera view.
-    /// </summary>
+    // Spawns a single scrap item ahead of the camera view.
     public void SpawnCollectible()
     {
         if (collectiblePrefab == null) return;
 
         float spawnX = mainCamera != null ? mainCamera.transform.position.x + spawnXDistance : transform.position.x + spawnXDistance;
         float spawnY = Random.Range(spawnYRange.x, spawnYRange.y);
-        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f); // Placed on gameplay Z-plane
+        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
 
         Instantiate(collectiblePrefab, spawnPos, Quaternion.identity);
     }
 
-    /// <summary>
-    /// Helper method to drop scrap at specific world coordinates (e.g., when an asteroid is blown up).
-    /// </summary>
+    // Helper method to drop scrap at specific world coordinates
     public void SpawnAtPosition(Vector3 position)
     {
         if (collectiblePrefab == null) return;

@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Shooting & Projectile Settings")]
     [SerializeField] private GameObject laserProjectilePrefab; // Drag laser prefab here
-    [SerializeField] private Transform firePoint;               // Drag laser muzzle point here
+    [SerializeField] private Transform firePoint;             // Drag laser muzzle point here
     [SerializeField] private float weaponRange = 100f;
     [SerializeField] private LayerMask shootableLayer;
 
@@ -70,9 +70,7 @@ public class PlayerController : MonoBehaviour
         transform.rotation = Quaternion.Euler(0f, 90f, targetTilt);
     }
 
-    /// <summary>
-    /// Executes raycast detection and spawns a visual laser projectile.
-    /// </summary>
+    // Executes raycast detection and spawns a visual laser projectile.
     private void HandleShooting()
     {
         if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
@@ -96,8 +94,9 @@ public class PlayerController : MonoBehaviour
                 Vector3 targetDirection = (hit.point - spawnPoint).normalized;
                 spawnRotation = Quaternion.LookRotation(targetDirection);
 
-                if (hit.collider.CompareTag("Asteroid"))
+                if (hit.collider.CompareTag("Asteroid") || hit.collider.CompareTag("Enemy"))
                 {
+                    Debug.Log("Raycast hit target: " + hit.collider.name);
                     Destroy(hit.collider.gameObject);
                 }
             }
@@ -112,13 +111,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // ONLY handle fatal asteroid collisions here
+        // Only handle fatal asteroid collisions here
         if (other.CompareTag("Asteroid"))
         {
             Debug.Log("Player collided with an Asteroid!");
             GameManager.Instance.GameOver(false);
             Destroy(gameObject);
         }
-        // REMOVED: Collectible tag check (handled by Collectible.cs)
     }
 }

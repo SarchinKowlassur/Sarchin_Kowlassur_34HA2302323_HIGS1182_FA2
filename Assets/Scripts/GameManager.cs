@@ -1,27 +1,30 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
 /// <summary>
-/// Singleton GameManager controlling score, win/loss states, and UI screens.
+/// Singleton GameManager controlling score, high score persistence via PlayerPrefs, win/loss states, and UI screens.
 /// </summary>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     [Header("Game Win Conditions")]
-    [SerializeField] private int scrapToWin = 10; // Set required target scrap count
+    [SerializeField] private int scrapToWin = 25; // Set required target scrap count
 
     [Header("UI Text References")]
     [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private TMP_Text highScoreText; // Reference for high score UI text
 
     [Header("UI Panel References")]
     [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private GameObject gameWinPanel;
 
     public int CurrentScore { get; private set; }
+    public int HighScore { get; private set; }
     public bool IsGameOver { get; private set; }
+
+    private const string HighScoreKey = "PlayerHighScore";
 
     private void Awake()
     {
@@ -38,20 +41,31 @@ public class GameManager : MonoBehaviour
         CurrentScore = 0;
         IsGameOver = false;
 
+        // Load Persistent High Score from PlayerPrefs (defaults to 0 if none saved)
+        HighScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (gameWinPanel != null) gameWinPanel.SetActive(false);
 
         UpdateScoreUI();
     }
 
-    /// <summary>
-    /// Call to add score when scrap is collected. Checks win condition.
-    /// </summary>
+    // Call to add score when scrap is collected. Checks win condition and updates persistent high score.
     public void AddScore(int amount)
     {
         if (IsGameOver) return;
 
         CurrentScore += amount;
+
+        // Check if current score beats the high score
+        if (CurrentScore > HighScore)
+        {
+            HighScore = CurrentScore;
+            PlayerPrefs.SetInt(HighScoreKey, HighScore);
+            PlayerPrefs.Save(); // Save data persistently
+            Debug.Log("New High Score Saved: " + HighScore);
+        }
+
         UpdateScoreUI();
 
         // Check if player reached the winning threshold
@@ -67,11 +81,15 @@ public class GameManager : MonoBehaviour
         {
             scoreText.text = $"Scrap: {CurrentScore} / {scrapToWin}";
         }
+
+        if (highScoreText != null)
+        {
+            highScoreText.text = $"High Score: {HighScore}";
+        }
     }
 
-    /// <summary>
-    /// Triggers the Win state and opens the Win Screen.
-    /// </summary>
+   
+    //Triggers the Win state and opens the Win Screen.
     public void GameWin()
     {
         IsGameOver = true;
@@ -82,20 +100,14 @@ public class GameManager : MonoBehaviour
             gameWinPanel.SetActive(true);
         }
 
-        // Freeze gameplay
         Time.timeScale = 0f;
     }
 
-    /// <summary>
-    /// Triggers the Game Over loss state.
-    /// </summary>
+ 
+    // Triggers the Game Over loss state.
     public void GameOver(bool won = false)
     {
-        if (won)
-        {
-            GameWin();
-            return;
-        }
+        if (won || IsGameOver) return;
 
         IsGameOver = true;
         Debug.Log("Game Over - Player destroyed!");
@@ -118,6 +130,6 @@ public class GameManager : MonoBehaviour
     public void LoadMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu"); // Make sure scene name matches Build Settings
+        SceneManager.LoadScene("MainMenu");
     }
 }

@@ -32,14 +32,13 @@ public class Collectible : MonoBehaviour
 
     private void Update()
     {
-        // 1. Continuous 3D rotation
+        // Continuous 3D rotation
         transform.Rotate(Vector3.up, rotateSpeed * Time.deltaTime, Space.World);
 
-        // 2. Gentle vertical floating animation
+        // Gentle vertical floating animation
         float newY = startPos.y + (Mathf.Sin(Time.time * floatSpeed) * floatAmplitude);
         transform.position = new Vector3(transform.position.x, newY, transform.position.z);
 
-        // 3. Auto-cleanup when left behind off-screen
         if (mainCameraTransform != null && transform.position.x < mainCameraTransform.position.x - destroyXOffset)
         {
             Destroy(gameObject);
@@ -54,7 +53,7 @@ public class Collectible : MonoBehaviour
         isCollected = true;
         Debug.Log("Scrap collected by Player!");
 
-        // Award points via GameManager Singleton
+        // Award points
         if (GameManager.Instance != null)
         {
             GameManager.Instance.AddScore(scoreValue);

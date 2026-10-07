@@ -14,21 +14,16 @@ public class MainMenuManager : MonoBehaviour
     {
         // Ensure game time is running normally
         Time.timeScale = 1f;
-
     }
 
-    /// <summary>
-    /// Loads the main gameplay scene. Hook this to the START button.
-    /// </summary>
+    // Loads the main gameplay scene. Hook this to the START button.
     public void StartGame()
     {
         Debug.Log("Loading Gameplay Scene: " + gameplaySceneName);
         SceneManager.LoadScene(gameplaySceneName);
     }
 
-    /// <summary>
-    /// Quits the application. Hook this to the QUIT button.
-    /// </summary>
+    // Quits the application. Hook this to the QUIT button.
     public void QuitGame()
     {
         Debug.Log("Exiting Game...");

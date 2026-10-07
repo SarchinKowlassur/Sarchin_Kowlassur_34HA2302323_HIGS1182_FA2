@@ -34,13 +34,12 @@ public class Asteroid : MonoBehaviour
 
     private void Update()
     {
-        // 1. Move left (-X) relative to world space to simulate drifting space hazards
+        // Move left
         transform.Translate(Vector3.left * driftSpeed * Time.deltaTime, Space.World);
 
-        // 2. Tumble asteroid in 3D space
+        // Tumble asteroid
         transform.Rotate(rotationAxis, rotationSpeed * Time.deltaTime);
 
-        // 3. Auto-cleanup when asteroid drifts past the camera's left view edge
         if (mainCameraTransform != null)
         {
             if (transform.position.x < mainCameraTransform.position.x - destroyXOffset)
